@@ -114,7 +114,7 @@ download_files = BashOperator(
     bash_command=(
         'python /opt/airflow/tempSRCfiles/download_task/download_ref_files.py '
         '/opt/airflow/tempSRCfiles/{{ var.value.current_space_id | replace("default/", "") }}/ '
-        '{{ var.value.plmxml_file }} && echo dowload_finished'
+        '{{ var.value.plmxml_file }} && echo finished'
     ),
     dag=dag,
 )
