@@ -158,11 +158,17 @@ list_jt_files_task = PythonOperator(
     dag=dag,
 )
 
-# Get list of JT files
-jt_files = list_jt_files()
+# # PythonOperator to list JT files
+# list_jt_files_task = PythonOperator(
+#     task_id='list_jt_files_task',
+#     python_callable=list_jt_files,
+#     op_kwargs={'folder_name': '{{ var.value.current_space_id }}', 'file_name': '{{ var.value.plmxml_file }}'},
+#     provide_context=True,
+#     dag=dag,
+# )
 
 # Loop over JT files and trigger STEP conversion for each file
-for i, jt_file in enumerate(jt_files):
+for i, jt_file in enumerate(list_jt_files_task.output):
     task_id = f'trigger_step_convert_{i}'
     trigger_step_convert = BashOperator(
         task_id=task_id,
