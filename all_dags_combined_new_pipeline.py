@@ -24,7 +24,7 @@ default_args = {
 
 # Define the DAG
 dag = DAG(
-    'All-DAGS-Combined',
+    'All-DAGS-Combined_new_pipeline',
     default_args=default_args,
     description='A DAG for processing and converting files',
     # schedule_interval=timedelta(days=1),
