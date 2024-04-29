@@ -159,7 +159,7 @@ def list_jt_files(folder_name, file_name, **kwargs):
 #     dag=dag,
 # )
 
-# # PythonOperator to list JT files
+
 # PythonOperator to list JT files
 list_jt_files_task = PythonOperator(
     task_id='list_jt_files_task',
@@ -171,8 +171,10 @@ list_jt_files_task = PythonOperator(
 
 # Fetch the output value of list_jt_files_task
 jt_files_task_instance = XCom.get_one(
-    task_id='list_jt_files_task',
+    key=None,
+    task_ids='list_jt_files_task',
     dag_id=dag.dag_id,
+    execution_date=dag.following_schedule(dag.start_date),
 )
 
 jt_files = jt_files_task_instance.value
