@@ -164,7 +164,7 @@ list_jt_files_task = PythonOperator(
 jt_files_task_instance = XCom.get_one(
     # (cls, execution_date, key=None, task_id=None, dag_id=None, include_prior_dates=False, session=None)
     key=None,
-    execution_date=dag.following_schedule(dag.start_date),
+    execution_date=timedelta(days=1),
     task_id='list_jt_files_task',
     dag_id=dag.dag_id,
     include_prior_dates=False, 
