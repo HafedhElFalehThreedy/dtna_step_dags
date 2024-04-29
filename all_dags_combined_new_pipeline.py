@@ -174,7 +174,6 @@ jt_files_task_instance = XCom.get_one(
     key=None,
     task_ids='list_jt_files_task',
     dag_id=dag.dag_id,
-    execution_date=dag.following_schedule(dag.start_date),
 )
 
 jt_files = jt_files_task_instance.value
