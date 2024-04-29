@@ -5,6 +5,7 @@ from airflow.operators.python_operator import PythonOperator
 from datetime import datetime, timedelta
 from airflow.models import Variable
 import os
+from airflow.models import XCom
 
 def set_variable(**kwargs):
     spaceid = kwargs['dag_run'].conf.get('space_id')
