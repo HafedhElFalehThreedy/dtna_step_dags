@@ -140,24 +140,15 @@ download_files = BashOperator(
 #     dag=dag,
 # )
 # Function to list all files in the directory that end with ".jt"
-def list_jt_files(folder_name, file_name, **kwargs):
+def list_jt_files(folder_name, file_name):
     jt_files = []
-    directory = '/opt/airflow/tempSRCfiles/' + folder_name + '/' + file_name.replace(".plmxml", "") + '_linked_files'
+    directory = '/opt/airflow/tempSRCfiles/' + folder_name + '/' + file_name.replace(".plmxml", "_linked_files")
 
     # List all files in the directory
     for filename in os.listdir(directory):
         if filename.endswith(".jt"):
             jt_files.append(os.path.join(directory, filename))
     return jt_files
-
-# PythonOperator to list JT files
-# list_jt_files_task = PythonOperator(
-#     task_id='list_jt_files_task',
-#     python_callable=list_jt_files,
-#     op_kwargs={'folder_name': '{{ var.value.current_space_id }}', 'file_name': '{{ var.value.plmxml_file }}'},
-#     provide_context=True,
-#     dag=dag,
-# )
 
 
 # PythonOperator to list JT files
@@ -171,9 +162,13 @@ list_jt_files_task = PythonOperator(
 
 # Fetch the output value of list_jt_files_task
 jt_files_task_instance = XCom.get_one(
+    # (cls, execution_date, key=None, task_id=None, dag_id=None, include_prior_dates=False, session=None)
     key=None,
-    task_ids='list_jt_files_task',
+    execution_date=None,
+    task_id='list_jt_files_task',
     dag_id=dag.dag_id,
+    include_prior_dates=False, 
+    session=None
 )
 
 jt_files = jt_files_task_instance.value
