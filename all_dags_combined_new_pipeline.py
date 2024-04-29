@@ -315,7 +315,7 @@ download_files = BashOperator(
 # PythonOperator to list JT files
 def list_jt_files(folder_name, file_name, **kwargs):
     jt_files = []
-    directory = '/opt/airflow/tempSRCfiles/' + folder_name + '/' + file_name.replace(".plmxml", "_linked_files")
+    directory = '/opt/airflow/tempSRCfiles/' + folder_name.replace("default/","") + '/' + file_name.replace(".plmxml", "_linked_files")
 
     # List all files in the directory
     for filename in os.listdir(directory):
