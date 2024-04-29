@@ -140,7 +140,6 @@ def trigger_step_convert(ti, **kwargs):
             'cd /opt/airflow/tempSRCfiles/coretech-2024-linux/build && '
             './CoreTechEval '
             f'{jt_file} '
-            f'/opt/airflow/tempSRCfiles/{{ var.value.current_space_id | replace("default/", "") }}/'
             f'{jt_file.replace(".jt", ".stp")}'
         )
         trigger_step_convert = BashOperator(
