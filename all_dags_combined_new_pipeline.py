@@ -119,6 +119,7 @@ def list_jt_files(folder_name, file_name, **kwargs):
 
     # List all files in the directory
     for filename in os.listdir(directory):
+        print(filename)
         if filename.endswith(".jt"):
             jt_files.append(os.path.join(directory, filename))
     return jt_files
@@ -130,7 +131,7 @@ list_jt_files_task = PythonOperator(
     provide_context=True,
     dag=dag,
 )
-# Loop over JT files and trigger STEP conversion for each file
+
 def trigger_step_convert(ti, **kwargs):
     jt_files = ti.xcom_pull(task_ids='list_jt_files_task', key='return_value')
     for i, jt_file in enumerate(jt_files):
@@ -139,6 +140,7 @@ def trigger_step_convert(ti, **kwargs):
             'cd /opt/airflow/tempSRCfiles/coretech-2024-linux/build && '
             './CoreTechEval '
             f'{jt_file} '
+            f'/opt/airflow/tempSRCfiles/{{ var.value.current_space_id | replace("default/", "") }}/'
             f'{jt_file.replace(".jt", ".stp")}'
         )
         trigger_step_convert = BashOperator(
