@@ -160,6 +160,7 @@ def list_jt_files(folder_name, file_name, **kwargs):
 # )
 
 # # PythonOperator to list JT files
+# PythonOperator to list JT files
 list_jt_files_task = PythonOperator(
     task_id='list_jt_files_task',
     python_callable=list_jt_files,
@@ -167,11 +168,11 @@ list_jt_files_task = PythonOperator(
     provide_context=True,
     dag=dag,
 )
+
 # Fetch the output value of list_jt_files_task
 jt_files_task_instance = XCom.get_one(
-    task_ids='list_jt_files_task',
+    task_id='list_jt_files_task',
     dag_id=dag.dag_id,
-    include_prior_dates=False,
 )
 
 jt_files = jt_files_task_instance.value
@@ -192,7 +193,6 @@ for i, jt_file in enumerate(jt_files):
     )
     # Set dependencies
     list_jt_files_task >> trigger_step_convert
-
 # Final dummy task to signify the end of the DAG
 end_of_dag = DummyOperator(
     task_id='end_of_dag',
