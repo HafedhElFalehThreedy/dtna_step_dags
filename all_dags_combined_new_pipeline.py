@@ -118,10 +118,8 @@ def trigger_step_convert(folder_name, file_name, **kwargs):
         # jt_files = []
         directory = '/opt/airflow/tempSRCfiles/' + folder_name.replace("default/", "") + '/' + file_name.replace(".plmxml", "_linked_files")
 
-        # List all files in the directory
         for filename in os.listdir(directory):
             if filename.endswith(".jt"):
-                # jt_files.append(os.path.join(directory, filename))
                 jt_file = os.path.join(directory, filename)
                 task_id = f'trigger_step_convert_{random.randint(1000, 9999)}'
                 bash_command = (
@@ -137,8 +135,7 @@ def trigger_step_convert(folder_name, file_name, **kwargs):
                     env={'LD_LIBRARY_PATH': '/opt/airflow/tempSRCfiles/coretech-2024-linux/lib/core_tech/lib:$LD_LIBRARY_PATH'},
                     dag=kwargs['dag'],
                 )
-                trigger_step_convert_op >> end_of_dag  # Link tasks to end_of_dag
-
+                trigger_step_convert_op.execute(context=kwargs)
         print("All JT files processed successfully.")
     except Exception as e:
         raise Exception(f"Error processing JT files: {e}")
