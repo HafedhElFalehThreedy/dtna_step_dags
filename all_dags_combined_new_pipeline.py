@@ -155,7 +155,7 @@ update_plmxml_stp_ref = BashOperator(
     bash_command=(
         'python /opt/airflow/tempSRCfiles/download_task/update_plmxml_stp_ref.py '
         '/opt/airflow/tempSRCfiles/{{ var.value.current_space_id | replace("default/", "") }}/ '
-        '{{ var.value.plmxml_file || replace(".plmxml", "_redirect.plmxml")}}'
+        '{{ var.value.plmxml_file | replace(".plmxml", "_redirect.plmxml")}}'
     ),
     dag=dag,
 )
