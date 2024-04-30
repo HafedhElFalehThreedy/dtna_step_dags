@@ -112,49 +112,36 @@ download_files = BashOperator(
     dag=dag,
 )
 
-
 def trigger_step_convert(folder_name, file_name, **kwargs):
-    try: 
-        
-        jt_files = []  # This variable is used, so no change here
-        directory = '/opt/airflow/tempSRCfiles/' + folder_name.replace("default/","") + '/' + file_name.replace(".plmxml", "_linked_files")
+    try:
+        jt_files = []
+        directory = '/opt/airflow/tempSRCfiles/' + folder_name.replace("default/", "") + '/' + file_name.replace(".plmxml", "_linked_files")
 
         # List all files in the directory
         for filename in os.listdir(directory):
-            print(filename)
             if filename.endswith(".jt"):
                 jt_files.append(os.path.join(directory, filename))
-                
+
         # Iterate over JT files
         for i, jt_file in enumerate(jt_files):
-            print(f"Processing JT file: {jt_file}")
             task_id = f'trigger_step_convert_{i}'
-            
-            # Construct bash command
             bash_command = (
                 'cd /opt/airflow/tempSRCfiles/coretech-2024-linux/build && '
                 './CoreTechEval '
                 f'{jt_file} '
                 f'{jt_file.replace(".jt", ".stp")}'
             )
-            
-            # Define BashOperator task
             trigger_step_convert_op = BashOperator(
                 task_id=task_id,
                 bash_command=bash_command,
                 env={'LD_LIBRARY_PATH': '/opt/airflow/tempSRCfiles/coretech-2024-linux/lib/core_tech/lib:$LD_LIBRARY_PATH'},
                 dag=kwargs['dag'],
             )
-             
-            
-            # Link tasks to end_of_dag
-            trigger_step_convert_op >> end_of_dag
-        
-        # Log success message
+            trigger_step_convert_op >> end_of_dag  # Link tasks to end_of_dag
+
         print("All JT files processed successfully.")
     except Exception as e:
-        # Log and handle any exceptions
-        print(f"Error processing JT files: {e}")
+        raise Exception(f"Error processing JT files: {e}")
 
 
 trigger_step_convert_task = PythonOperator(
