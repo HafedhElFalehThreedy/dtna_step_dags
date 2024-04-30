@@ -168,4 +168,4 @@ end_of_dag = DummyOperator(
 )
 
 # Set task dependencies without creating a cycle
-trigger_export >> set_current_space_id >> create_global_folder_task >> nodejs_space_export_to_plxml >> get_plmxml_structure_file >> download_files >> trigger_step_convert_task >> end_of_dag
+trigger_export >> set_current_space_id >> create_global_folder_task >> nodejs_space_export_to_plxml >> get_plmxml_structure_file >> download_files >> trigger_step_convert_task >> update_plmxml_stp_ref >> end_of_dag
