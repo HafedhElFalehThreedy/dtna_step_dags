@@ -115,13 +115,13 @@ download_files = BashOperator(
 
 def trigger_step_convert(folder_name, file_name, **kwargs):
     try:
-        jt_files = []
+        # jt_files = []
         directory = '/opt/airflow/tempSRCfiles/' + folder_name.replace("default/", "") + '/' + file_name.replace(".plmxml", "_linked_files")
 
         # List all files in the directory
         for filename in os.listdir(directory):
             if filename.endswith(".jt"):
-                jt_files.append(os.path.join(directory, filename))
+                # jt_files.append(os.path.join(directory, filename))
                 jt_file = os.path.join(directory, filename)
                 task_id = f'trigger_step_convert_{random.randint(1000, 9999)}'
                 bash_command = (
@@ -130,6 +130,7 @@ def trigger_step_convert(folder_name, file_name, **kwargs):
                     f'{jt_file} '
                     f'{jt_file.replace(".jt", ".stp")}'
                 )
+                print(f"Processing bash_command: {bash_command}")
                 trigger_step_convert_op = BashOperator(
                     task_id=task_id,
                     bash_command=bash_command,
@@ -138,7 +139,7 @@ def trigger_step_convert(folder_name, file_name, **kwargs):
                 )
                 trigger_step_convert_op >> end_of_dag  # Link tasks to end_of_dag
 
-            print("All JT files processed successfully.")
+        print("All JT files processed successfully.")
     except Exception as e:
         raise Exception(f"Error processing JT files: {e}")
 
