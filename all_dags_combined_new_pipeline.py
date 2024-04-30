@@ -132,6 +132,26 @@ list_jt_files_task = PythonOperator(
     dag=dag,
 )
 
+# def trigger_step_convert(ti, **kwargs):
+#     jt_files = ti.xcom_pull(task_ids='list_jt_files_task', key='return_value')
+#     for i, jt_file in enumerate(jt_files):
+#         print(f"Processing JT file: {jt_file}")
+#         task_id = f'trigger_step_convert_{i}'
+#         bash_command = (
+#             'cd /opt/airflow/tempSRCfiles/coretech-2024-linux/build && '
+#             './CoreTechEval '
+#             f'{jt_file} '
+#             f'{jt_file.replace(".jt", ".stp")}'
+#         )
+#         trigger_step_convert = BashOperator(
+#             task_id=task_id,
+#             bash_command=bash_command,
+#             env={'LD_LIBRARY_PATH': '/opt/airflow/tempSRCfiles/coretech-2024-linux/lib/core_tech/lib:$LD_LIBRARY_PATH'},
+#             dag=kwargs['dag'],
+#         )
+#         # Set dependencies
+#         ti.xcom_push(key=f'convert_task_{i}', value=task_id)
+#         ti.xcom_push(key=f'convert_command_{i}', value=bash_command)
 def trigger_step_convert(ti, **kwargs):
     jt_files = ti.xcom_pull(task_ids='list_jt_files_task', key='return_value')
     for i, jt_file in enumerate(jt_files):
@@ -143,7 +163,7 @@ def trigger_step_convert(ti, **kwargs):
             f'{jt_file} '
             f'{jt_file.replace(".jt", ".stp")}'
         )
-        trigger_step_convert = BashOperator(
+        trigger_step_convert_op = BashOperator(  # Renamed the BashOperator object
             task_id=task_id,
             bash_command=bash_command,
             env={'LD_LIBRARY_PATH': '/opt/airflow/tempSRCfiles/coretech-2024-linux/lib/core_tech/lib:$LD_LIBRARY_PATH'},
@@ -152,6 +172,7 @@ def trigger_step_convert(ti, **kwargs):
         # Set dependencies
         ti.xcom_push(key=f'convert_task_{i}', value=task_id)
         ti.xcom_push(key=f'convert_command_{i}', value=bash_command)
+
 
 trigger_step_convert_task = PythonOperator(
     task_id='trigger_step_convert_task',
