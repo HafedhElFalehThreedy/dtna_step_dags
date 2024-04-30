@@ -160,6 +160,20 @@ update_plmxml_stp_ref = BashOperator(
     dag=dag,
 )
 
+# Subtasks 3: Trigger STEP conversion
+trigger_step_convert_plmxml_mono = BashOperator(
+    task_id='trigger_step_convert_plmxml_mono',
+    bash_command=(
+            'cd /opt/airflow/tempSRCfiles/coretech-2024-linux/build && '
+            './CoreTechEval '
+            '/opt/airflow/tempSRCfiles/{{ var.value.current_space_id | replace("default/", "") }}/'
+            '{{ var.value.plmxml_file | replace(".plmxml", "_redirect_stp.plmxml") }}   '
+            '/opt/airflow/tempSRCfiles/{{ var.value.current_space_id | replace("default/", "") }}/'
+            '{{ var.value.plmxml_file | replace(".plmxml", "_redirect") }}.stp'
+        ),    
+    env={'LD_LIBRARY_PATH': '/opt/airflow/tempSRCfiles/coretech-2024-linux/lib/core_tech/lib:$LD_LIBRARY_PATH'},
+    dag=dag,
+)
 
 # Final dummy task to signify the end of the DAG
 end_of_dag = DummyOperator(
@@ -168,4 +182,4 @@ end_of_dag = DummyOperator(
 )
 
 # Set task dependencies without creating a cycle
-trigger_export >> set_current_space_id >> create_global_folder_task >> nodejs_space_export_to_plxml >> get_plmxml_structure_file >> download_files >> trigger_step_convert_task >> update_plmxml_stp_ref >> end_of_dag
+trigger_export >> set_current_space_id >> create_global_folder_task >> nodejs_space_export_to_plxml >> get_plmxml_structure_file >> download_files >> trigger_step_convert_task >> update_plmxml_stp_ref >> trigger_step_convert_plmxml_mono >> end_of_dag
