@@ -135,6 +135,7 @@ list_jt_files_task = PythonOperator(
 def trigger_step_convert(ti, **kwargs):
     jt_files = ti.xcom_pull(task_ids='list_jt_files_task', key='return_value')
     for i, jt_file in enumerate(jt_files):
+        print(f"Processing JT file: {jt_file}")
         task_id = f'trigger_step_convert_{i}'
         bash_command = (
             'cd /opt/airflow/tempSRCfiles/coretech-2024-linux/build && '
