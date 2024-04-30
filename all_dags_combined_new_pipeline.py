@@ -112,30 +112,19 @@ download_files = BashOperator(
     dag=dag,
 )
 
-# PythonOperator to list JT files
-def list_jt_files(folder_name, file_name, **kwargs):
-    jt_files = []  # This variable is used, so no change here
-    directory = '/opt/airflow/tempSRCfiles/' + folder_name.replace("default/","") + '/' + file_name.replace(".plmxml", "_linked_files")
 
-    # List all files in the directory
-    for filename in os.listdir(directory):
-        print(filename)
-        if filename.endswith(".jt"):
-            jt_files.append(os.path.join(directory, filename))
-    return jt_files
-
-list_jt_files_task = PythonOperator(
-    task_id='list_jt_files_task',
-    python_callable=list_jt_files,
-    op_kwargs={'folder_name': '{{ var.value.current_space_id }}', 'file_name': '{{ var.value.plmxml_file }}'},
-    provide_context=True,  # This line is unchanged, so no change here
-    dag=dag,
-)
-def trigger_step_convert(ti, **kwargs):
-    try:
-        # Retrieve JT files from XCom
-        jt_files = ti.xcom_pull(task_ids='list_jt_files_task', key='return_value')
+def trigger_step_convert(folder_name, file_name, **kwargs):
+    try: 
         
+        jt_files = []  # This variable is used, so no change here
+        directory = '/opt/airflow/tempSRCfiles/' + folder_name.replace("default/","") + '/' + file_name.replace(".plmxml", "_linked_files")
+
+        # List all files in the directory
+        for filename in os.listdir(directory):
+            print(filename)
+            if filename.endswith(".jt"):
+                jt_files.append(os.path.join(directory, filename))
+                
         # Iterate over JT files
         for i, jt_file in enumerate(jt_files):
             print(f"Processing JT file: {jt_file}")
@@ -156,10 +145,7 @@ def trigger_step_convert(ti, **kwargs):
                 env={'LD_LIBRARY_PATH': '/opt/airflow/tempSRCfiles/coretech-2024-linux/lib/core_tech/lib:$LD_LIBRARY_PATH'},
                 dag=kwargs['dag'],
             )
-            
-            # Set dependencies
-            ti.xcom_push(key=f'convert_task_{i}', value=task_id)
-            ti.xcom_push(key=f'convert_command_{i}', value=bash_command)
+             
             
             # Link tasks to end_of_dag
             trigger_step_convert_op >> end_of_dag
@@ -174,6 +160,7 @@ def trigger_step_convert(ti, **kwargs):
 trigger_step_convert_task = PythonOperator(
     task_id='trigger_step_convert_task',
     python_callable=trigger_step_convert,
+    op_kwargs={'folder_name': '{{ var.value.current_space_id }}', 'file_name': '{{ var.value.plmxml_file }}'},
     provide_context=True,
     dag=dag,
 )
