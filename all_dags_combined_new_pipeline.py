@@ -149,6 +149,17 @@ trigger_step_convert_task = PythonOperator(
     dag=dag,
 )
 
+# Subtasks 2: Download files
+update_plmxml_stp_ref = BashOperator(
+    task_id='update_plmxml_stp_ref',
+    bash_command=(
+        'python /opt/airflow/tempSRCfiles/download_task/update_plmxml_stp_ref.py '
+        '/opt/airflow/tempSRCfiles/{{ var.value.current_space_id | replace("default/", "") }}/ '
+        '{{ var.value.plmxml_file || replace(".plmxml", "_redirect.plmxml")}}'
+    ),
+    dag=dag,
+)
+
 
 # Final dummy task to signify the end of the DAG
 end_of_dag = DummyOperator(
