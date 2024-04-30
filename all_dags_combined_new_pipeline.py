@@ -1,3 +1,4 @@
+import random
 from airflow.models import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.bash_operator import BashOperator
@@ -121,25 +122,23 @@ def trigger_step_convert(folder_name, file_name, **kwargs):
         for filename in os.listdir(directory):
             if filename.endswith(".jt"):
                 jt_files.append(os.path.join(directory, filename))
+                jt_file = os.path.join(directory, filename)
+                task_id = f'trigger_step_convert_{random.randint(1000, 9999)}'
+                bash_command = (
+                    'cd /opt/airflow/tempSRCfiles/coretech-2024-linux/build && '
+                    './CoreTechEval '
+                    f'{jt_file} '
+                    f'{jt_file.replace(".jt", ".stp")}'
+                )
+                trigger_step_convert_op = BashOperator(
+                    task_id=task_id,
+                    bash_command=bash_command,
+                    env={'LD_LIBRARY_PATH': '/opt/airflow/tempSRCfiles/coretech-2024-linux/lib/core_tech/lib:$LD_LIBRARY_PATH'},
+                    dag=kwargs['dag'],
+                )
+                trigger_step_convert_op >> end_of_dag  # Link tasks to end_of_dag
 
-        # Iterate over JT files
-        for i, jt_file in enumerate(jt_files):
-            task_id = f'trigger_step_convert_{i}'
-            bash_command = (
-                'cd /opt/airflow/tempSRCfiles/coretech-2024-linux/build && '
-                './CoreTechEval '
-                f'{jt_file} '
-                f'{jt_file.replace(".jt", ".stp")}'
-            )
-            trigger_step_convert_op = BashOperator(
-                task_id=task_id,
-                bash_command=bash_command,
-                env={'LD_LIBRARY_PATH': '/opt/airflow/tempSRCfiles/coretech-2024-linux/lib/core_tech/lib:$LD_LIBRARY_PATH'},
-                dag=kwargs['dag'],
-            )
-            trigger_step_convert_op >> end_of_dag  # Link tasks to end_of_dag
-
-        print("All JT files processed successfully.")
+            print("All JT files processed successfully.")
     except Exception as e:
         raise Exception(f"Error processing JT files: {e}")
 
