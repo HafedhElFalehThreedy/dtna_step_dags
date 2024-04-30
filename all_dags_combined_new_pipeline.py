@@ -149,7 +149,7 @@ trigger_step_convert_task = PythonOperator(
     dag=dag,
 )
 
-# Subtasks 2: Download files
+# Subtasks 4: update_plmxml_stp_ref
 update_plmxml_stp_ref = BashOperator(
     task_id='update_plmxml_stp_ref',
     bash_command=(
