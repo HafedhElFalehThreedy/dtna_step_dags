@@ -121,7 +121,7 @@ def trigger_step_convert(folder_name, file_name, **kwargs):
         for filename in os.listdir(directory):
             if filename.endswith(".jt"):
                 jt_file = os.path.join(directory, filename)
-                task_id = f'trigger_step_convert_{random.randint(1000, 9999)}'
+                task_id = f'trigger_step_convert_{filename}'
                 bash_command = (
                     'cd /opt/airflow/tempSRCfiles/coretech-2024-linux/build && '
                     './CoreTechEval '
@@ -169,7 +169,7 @@ trigger_step_convert_plmxml_mono = BashOperator(
             '/opt/airflow/tempSRCfiles/{{ var.value.current_space_id | replace("default/", "") }}/'
             '{{ var.value.plmxml_file | replace(".plmxml", "_redirect_stp.plmxml") }}   '
             '/opt/airflow/tempSRCfiles/{{ var.value.current_space_id | replace("default/", "") }}/'
-            '{{ var.value.plmxml_file | replace(".plmxml", "_redirect") }}.stp'
+            '{{ var.value.plmxml_file | replace(".plmxml", "_redirect_mono") }}.stp'
         ),    
     env={'LD_LIBRARY_PATH': '/opt/airflow/tempSRCfiles/coretech-2024-linux/lib/core_tech/lib:$LD_LIBRARY_PATH'},
     dag=dag,
