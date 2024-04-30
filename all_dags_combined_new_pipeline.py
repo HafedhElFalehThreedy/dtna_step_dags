@@ -107,7 +107,7 @@ download_files = BashOperator(
     bash_command=(
         'python /opt/airflow/tempSRCfiles/download_task/download_ref_files.py '
         '/opt/airflow/tempSRCfiles/{{ var.value.current_space_id | replace("default/", "") }}/ '
-        '{{ var.value.plmxml_file }} && echo finished'
+        '{{ var.value.plmxml_file }}'
     ),
     dag=dag,
 )
@@ -131,28 +131,44 @@ list_jt_files_task = PythonOperator(
     provide_context=True,  # This line is unchanged, so no change here
     dag=dag,
 )
-
 def trigger_step_convert(ti, **kwargs):
-    jt_files = ti.xcom_pull(task_ids='list_jt_files_task', key='return_value')
-    for i, jt_file in enumerate(jt_files):
-        print(f"Processing JT file: {jt_file}")
-        task_id = f'trigger_step_convert_{i}'
-        bash_command = (
-            'cd /opt/airflow/tempSRCfiles/coretech-2024-linux/build && '
-            './CoreTechEval '
-            f'{jt_file} '
-            f'{jt_file.replace(".jt", ".stp")}'
-        )
-        trigger_step_convert_op = BashOperator(  # Renamed the BashOperator object
-            task_id=task_id,
-            bash_command=bash_command,
-            env={'LD_LIBRARY_PATH': '/opt/airflow/tempSRCfiles/coretech-2024-linux/lib/core_tech/lib:$LD_LIBRARY_PATH'},
-            dag=kwargs['dag'],
-        )
-        # Set dependencies
-        ti.xcom_push(key=f'convert_task_{i}', value=task_id)
-        ti.xcom_push(key=f'convert_command_{i}', value=bash_command)
-        trigger_step_convert_op >> end_of_dag  # Add this line to link the dynamically created tasks to the end_of_dag task
+    try:
+        # Retrieve JT files from XCom
+        jt_files = ti.xcom_pull(task_ids='list_jt_files_task', key='return_value')
+        
+        # Iterate over JT files
+        for i, jt_file in enumerate(jt_files):
+            print(f"Processing JT file: {jt_file}")
+            task_id = f'trigger_step_convert_{i}'
+            
+            # Construct bash command
+            bash_command = (
+                'cd /opt/airflow/tempSRCfiles/coretech-2024-linux/build && '
+                './CoreTechEval '
+                f'{jt_file} '
+                f'{jt_file.replace(".jt", ".stp")}'
+            )
+            
+            # Define BashOperator task
+            trigger_step_convert_op = BashOperator(
+                task_id=task_id,
+                bash_command=bash_command,
+                env={'LD_LIBRARY_PATH': '/opt/airflow/tempSRCfiles/coretech-2024-linux/lib/core_tech/lib:$LD_LIBRARY_PATH'},
+                dag=kwargs['dag'],
+            )
+            
+            # Set dependencies
+            ti.xcom_push(key=f'convert_task_{i}', value=task_id)
+            ti.xcom_push(key=f'convert_command_{i}', value=bash_command)
+            
+            # Link tasks to end_of_dag
+            trigger_step_convert_op >> end_of_dag
+        
+        # Log success message
+        print("All JT files processed successfully.")
+    except Exception as e:
+        # Log and handle any exceptions
+        print(f"Error processing JT files: {e}")
 
 
 trigger_step_convert_task = PythonOperator(
