@@ -66,9 +66,9 @@ trigger_export = BashOperator(
 
 # Define the bash command with string manipulation to remove 'default/' prefix
 bash_command = """
-cd /opt/airflow/tempSRCfiles/export_plmxml/ && \
+cd /opt/airflow/tempSRCfiles/export_plmxml/src/ && \
 node ./index.js --space_id {{ var.value.current_space_id | replace('default/', '') }} --target_folder /opt/airflow/tempSRCfiles/{{ var.value.current_space_id | replace('default/', '') }} && \
-cd /opt/airflow/tempSRCfiles/{{ var.value.current_space_id | replace('default/', '') }}   
+cd /opt/airflow/tempSRCfiles/{{ var.value.current_space_id | replace('default/', '') -l  /opt/airflow/tempSRCfiles/export_plmxml/src/invalid_list.txt }}   
 """
 
 # Subtasks 1: Export to PLMXML
